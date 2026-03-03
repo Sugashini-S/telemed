@@ -7,6 +7,8 @@ export const translations = {
         nav_login: "Login",
         nav_register: "Register",
         nav_logout: "Logout",
+        nav_profile: "Profile",
+        nav_my_dashboard: "My Dashboard",
         nav_language: "தமிழ்",
 
         // Landing Page
@@ -99,6 +101,8 @@ export const translations = {
         nav_login: "உள்நுழை",
         nav_register: "பதிவு",
         nav_logout: "வெளியேறு",
+        nav_profile: "சுயவிவரம்",
+        nav_my_dashboard: "என் டாஷ்போர்டு",
         nav_language: "English",
 
         // Landing Page

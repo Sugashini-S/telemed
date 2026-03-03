@@ -68,7 +68,7 @@ export default function DoctorDashboard() {
                 setSlots(doctorData.available_slots as string[]);
             }
 
-            // Get appointments
+            // Get appointments for this doctor
             const { data: appts } = await supabase
                 .from("appointments")
                 .select("id, appointment_date, appointment_time, status, users:patient_id(name, email)")
@@ -144,6 +144,24 @@ export default function DoctorDashboard() {
         }
     };
 
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr + "T00:00:00");
+        return date.toLocaleDateString("en-IN", {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+    };
+
+    const formatTime = (timeStr: string) => {
+        const [h, m] = timeStr.split(":");
+        const hour = parseInt(h);
+        const ampm = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${m} ${ampm}`;
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-b from-sage-100/50 to-white flex items-center justify-center">
@@ -162,38 +180,59 @@ export default function DoctorDashboard() {
     const upcomingAppointments = appointments.filter(
         (a) => a.appointment_date > todayStr && a.status === "booked"
     );
+    const allBooked = appointments.filter((a) => a.status === "booked");
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-sage-100/50 to-white">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-sage-900">
-                        {t("doctor_dashboard_title")}
-                    </h1>
-                    {doctorName && (
-                        <p className="text-sage-600 mt-1">Welcome, Dr. {doctorName} 🩺</p>
-                    )}
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 bg-gradient-to-br from-sage-500 to-sage-700 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                        {doctorName ? doctorName.charAt(0).toUpperCase() : "D"}
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold text-sage-900">
+                            {t("doctor_dashboard_title")}
+                        </h1>
+                        {doctorName && (
+                            <p className="text-sage-600 mt-0.5">Welcome, Dr. {doctorName} 🩺</p>
+                        )}
+                    </div>
                 </div>
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 mb-8">
                     <Card className="rounded-xl border-sage-100 shadow-sm">
-                        <CardContent className="p-4 text-center">
+                        <CardContent className="p-5 text-center">
+                            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
                             <div className="text-2xl font-bold text-sage-800">{todayAppointments.length}</div>
-                            <div className="text-xs text-sage-600">Today</div>
+                            <div className="text-xs text-sage-600 mt-0.5">Today</div>
                         </CardContent>
                     </Card>
                     <Card className="rounded-xl border-sage-100 shadow-sm">
-                        <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-sage-800">{upcomingAppointments.length}</div>
-                            <div className="text-xs text-sage-600">Upcoming</div>
+                        <CardContent className="p-5 text-center">
+                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div className="text-2xl font-bold text-sage-800">{allBooked.length}</div>
+                            <div className="text-xs text-sage-600 mt-0.5">Total Upcoming</div>
                         </CardContent>
                     </Card>
                     <Card className="rounded-xl border-sage-100 shadow-sm">
-                        <CardContent className="p-4 text-center">
+                        <CardContent className="p-5 text-center">
+                            <div className="w-10 h-10 bg-sage-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                                <svg className="w-5 h-5 text-sage-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
                             <div className="text-2xl font-bold text-sage-800">{slots.length}</div>
-                            <div className="text-xs text-sage-600">Slots</div>
+                            <div className="text-xs text-sage-600 mt-0.5">Slots</div>
                         </CardContent>
                     </Card>
                 </div>
@@ -202,7 +241,12 @@ export default function DoctorDashboard() {
                     {/* Manage Slots */}
                     <Card className="rounded-xl border-sage-100 shadow-sm">
                         <CardHeader>
-                            <CardTitle className="text-sage-900">{t("doctor_manage_slots")}</CardTitle>
+                            <CardTitle className="text-sage-900 flex items-center gap-2">
+                                <svg className="w-5 h-5 text-sage-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {t("doctor_manage_slots")}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             {/* Add Slot */}
@@ -251,7 +295,12 @@ export default function DoctorDashboard() {
                     {/* Today's Appointments */}
                     <Card className="rounded-xl border-sage-100 shadow-sm">
                         <CardHeader>
-                            <CardTitle className="text-sage-900">{t("doctor_today")}</CardTitle>
+                            <CardTitle className="text-sage-900 flex items-center gap-2">
+                                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                {t("doctor_today")}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             {todayAppointments.length === 0 ? (
@@ -265,11 +314,16 @@ export default function DoctorDashboard() {
                                             key={appt.id}
                                             className="flex items-center justify-between p-3 bg-sage-50/50 rounded-xl border border-sage-100"
                                         >
-                                            <div>
-                                                <p className="font-medium text-sage-900 text-sm">
-                                                    {appt.users?.name || "Patient"}
-                                                </p>
-                                                <p className="text-xs text-sage-600">{appt.appointment_time}</p>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 bg-sage-200 rounded-full flex items-center justify-center text-sage-700 text-sm font-bold">
+                                                    {appt.users?.name ? appt.users.name.charAt(0).toUpperCase() : "P"}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-sage-900 text-sm">
+                                                        {appt.users?.name || "Patient"}
+                                                    </p>
+                                                    <p className="text-xs text-sage-600">{formatTime(appt.appointment_time)}</p>
+                                                </div>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 {getStatusBadge(appt.status)}
@@ -296,29 +350,55 @@ export default function DoctorDashboard() {
                 {upcomingAppointments.length > 0 && (
                     <Card className="rounded-xl border-sage-100 shadow-sm mt-6">
                         <CardHeader>
-                            <CardTitle className="text-sage-900">{t("dashboard_upcoming")}</CardTitle>
+                            <CardTitle className="text-sage-900 flex items-center gap-2">
+                                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                {t("dashboard_upcoming")}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3">
                                 {upcomingAppointments.map((appt) => (
                                     <div
                                         key={appt.id}
-                                        className="flex items-center justify-between p-4 bg-sage-50/50 rounded-xl border border-sage-100"
+                                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-sage-50/50 rounded-xl border border-sage-100 gap-3"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-sage-100 rounded-xl flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-sage-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                </svg>
+                                            <div className="w-10 h-10 bg-sage-200 rounded-full flex items-center justify-center text-sage-700 text-sm font-bold shrink-0">
+                                                {appt.users?.name ? appt.users.name.charAt(0).toUpperCase() : "P"}
                                             </div>
                                             <div>
-                                                <p className="font-medium text-sage-900">{appt.users?.name || "Patient"}</p>
-                                                <p className="text-sm text-sage-600">
-                                                    {appt.appointment_date} at {appt.appointment_time}
-                                                </p>
+                                                <p className="font-semibold text-sage-900">{appt.users?.name || "Patient"}</p>
+                                                <div className="flex items-center gap-3 mt-0.5 text-xs text-sage-500">
+                                                    <span className="flex items-center gap-1">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        {formatDate(appt.appointment_date)}
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        {formatTime(appt.appointment_time)}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                        {getStatusBadge(appt.status)}
+                                        <div className="flex items-center gap-2 sm:shrink-0">
+                                            {getStatusBadge(appt.status)}
+                                            {appt.status === "booked" && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => markComplete(appt.id)}
+                                                    className="rounded-xl border-green-200 text-green-700 hover:bg-green-50 text-xs"
+                                                >
+                                                    ✓ Complete
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
