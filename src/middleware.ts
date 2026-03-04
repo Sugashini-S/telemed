@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 // Routes that require authentication
-const protectedRoutes = ["/doctors", "/dashboard"];
+const protectedRoutes = ["/doctors", "/dashboard", "/admin"];
 
 export async function middleware(request: NextRequest) {
     // First, refresh the session (existing behavior)
@@ -41,6 +41,20 @@ export async function middleware(request: NextRequest) {
             const loginUrl = new URL("/login", request.url);
             loginUrl.searchParams.set("redirectTo", pathname);
             return NextResponse.redirect(loginUrl);
+        }
+
+        // If it's an admin route, check user's role
+        if (pathname.startsWith("/admin")) {
+            const { data: userData } = await supabase
+                .from("users")
+                .select("role")
+                .eq("id", user.id)
+                .single();
+
+            if (userData?.role !== "admin") {
+                // Redirect standard users to home page
+                return NextResponse.redirect(new URL("/", request.url));
+            }
         }
     }
 

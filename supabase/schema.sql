@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
-  role TEXT CHECK (role IN ('patient', 'doctor')) NOT NULL,
+  role TEXT CHECK (role IN ('patient', 'doctor', 'admin')) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS doctors (
   id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   specialization TEXT NOT NULL,
   available_slots JSONB DEFAULT '[]'::jsonb,
+  is_approved BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
