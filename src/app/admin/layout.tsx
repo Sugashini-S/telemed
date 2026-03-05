@@ -1,4 +1,5 @@
 "use client";
+import "../globals.css";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -31,6 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   const handleLogout = async () => {
+    if (!window.confirm("Are you sure you want to logout?")) return;
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
@@ -44,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen flex bg-gray-100">
       {sidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`fixed top-0 left-0 h-full w-64 bg-gray-900 text-white z-30 transform transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto flex flex-col`}>
+      <aside className={`fixed top-0 left-0 h-full w-64 bg-gray-900 text-white z-30 transform transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto flex flex-col overflow-hidden`}>
         <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-700">
           <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center"><Heart className="w-5 h-5 text-white" /></div>
           <div><p className="font-bold text-sm text-white">TN Clinic Booker</p><p className="text-xs text-green-400">Admin Panel</p></div>
