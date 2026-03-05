@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { Search, Download, Trash2, Edit2, Check, X, CheckCircle, XCircle, Plus, UserPlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -47,7 +47,7 @@ export function DoctorsTable({ doctors: initial }: { doctors: Doctor[] }) {
       });
       const result = await res.json();
       if (!res.ok) { setAddError(result.error || "Failed to create doctor"); setAdding(false); return; }
-      alert("Doctor created successfully!"); setShowAdd(false); setAddName(""); setAddEmail(""); setAddPhone(""); setAddPassword(""); setAddSpec("General Medicine");
+      alert("Doctor created successfully!"); window.location.href = "/admin/doctors"; setShowAdd(false); setAddName(""); setAddEmail(""); setAddPhone(""); setAddPassword(""); setAddSpec("General Medicine");
       router.refresh();
     } catch (e) { setAddError("Something went wrong"); }
     setAdding(false);
@@ -195,3 +195,5 @@ export function DoctorsTable({ doctors: initial }: { doctors: Doctor[] }) {
     </div>
   );
 }
+
+

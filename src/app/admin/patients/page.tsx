@@ -1,4 +1,5 @@
-﻿import { createClient } from "@/lib/supabase/server";
+﻿export const dynamic = "force-dynamic";
+import { createClient } from "@/lib/supabase/server";
 import { PatientsTable } from "@/components/admin/PatientsTable";
 
 export default async function PatientsPage() {
@@ -20,3 +21,5 @@ export default async function PatientsPage() {
 
   return <PatientsTable patients={patients} />;
 }
+
+
