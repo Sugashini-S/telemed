@@ -47,7 +47,7 @@ export function DoctorsTable({ doctors: initial }: { doctors: Doctor[] }) {
       });
       const result = await res.json();
       if (!res.ok) { setAddError(result.error || "Failed to create doctor"); setAdding(false); return; }
-      setShowAdd(false); setAddName(""); setAddEmail(""); setAddPhone(""); setAddPassword(""); setAddSpec("General Medicine");
+      alert("Doctor created successfully!"); setShowAdd(false); setAddName(""); setAddEmail(""); setAddPhone(""); setAddPassword(""); setAddSpec("General Medicine");
       router.refresh();
     } catch (e) { setAddError("Something went wrong"); }
     setAdding(false);
@@ -171,7 +171,7 @@ export function DoctorsTable({ doctors: initial }: { doctors: Doctor[] }) {
                     <td className="py-3 px-3">{editId === d.id ? <select value={editSpec} onChange={(e) => setEditSpec(e.target.value)} className="border border-gray-200 rounded px-2 py-1 text-sm">{SPECIALIZATIONS.map(s => <option key={s}>{s}</option>)}</select> : <span className="text-gray-600">{d.doctors?.[0]?.specialization || "-"}</span>}</td>
                     <td className="py-3 px-3"><span className={`px-2.5 py-1 rounded-full text-xs font-medium ${isApproved ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>{isApproved ? "? Approved" : "? Pending"}</span></td>
                     <td className="py-3 px-3"><span className="font-semibold text-gray-700">{d.appointments.length}</span></td>
-                    <td className="py-3 px-3 text-gray-400 text-xs">{new Date(d.created_at).toLocaleDateString()}</td>
+                    <td className="py-3 px-3 text-gray-400 text-xs">{new Date(d.created_at).toISOString().split("T")[0]}</td>
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-1">
                         {editId === d.id ? (<>
