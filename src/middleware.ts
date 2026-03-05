@@ -1,74 +1,67 @@
-import { updateSession } from "@/lib/supabase/middleware";
-import { type NextRequest, NextResponse } from "next/server";
+﻿import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-// Routes that require authentication
-const protectedRoutes = ["/doctors", "/dashboard", "/admin"];
-
 export async function middleware(request: NextRequest) {
-    // First, refresh the session (existing behavior)
-    const response = await updateSession(request);
+  const { pathname } = request.nextUrl;
 
-    const { pathname } = request.nextUrl;
+  let supabaseResponse = NextResponse.next({ request });
 
-    // Check if the current route is protected
-    const isProtected = protectedRoutes.some(
-        (route) => pathname === route || pathname.startsWith(route + "/")
-    );
-
-    if (isProtected) {
-        // Create a read-only Supabase client to check the session
-        const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            {
-                cookies: {
-                    getAll() {
-                        return request.cookies.getAll();
-                    },
-                    // eslint-disable-next-line @typescript-eslint/no-empty-function
-                    setAll() { },
-                },
-            }
-        );
-
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-            // Redirect to login with return URL
-            const loginUrl = new URL("/login", request.url);
-            loginUrl.searchParams.set("redirectTo", pathname);
-            return NextResponse.redirect(loginUrl);
-        }
-
-        // If it's an admin route, check user's role
-        if (pathname.startsWith("/admin")) {
-            const { data: userData } = await supabase
-                .from("users")
-                .select("role")
-                .eq("id", user.id)
-                .single();
-
-            if (userData?.role !== "admin") {
-                // Redirect standard users to home page
-                return NextResponse.redirect(new URL("/", request.url));
-            }
-        }
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll(); },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
     }
+  );
 
-    return response;
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (pathname === "/admin/login") {
+    if (user) {
+      const { data: roleData } = await supabase.rpc("get_user_role", { user_id: user.id });
+      if (roleData === "admin") {
+        return NextResponse.redirect(new URL("/admin", request.url));
+      }
+    }
+    return supabaseResponse;
+  }
+
+  if (pathname.startsWith("/admin")) {
+    if (!user) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+    const { data: roleData } = await supabase.rpc("get_user_role", { user_id: user.id });
+    if (roleData !== "admin") {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+    return supabaseResponse;
+  }
+
+  const protectedRoutes = ["/doctors", "/dashboard"];
+  const isProtected = protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  );
+
+  if (isProtected && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirectTo", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return supabaseResponse;
 }
 
 export const config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         */
-        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-    ],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

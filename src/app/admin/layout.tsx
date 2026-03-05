@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import "../globals.css";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -14,13 +14,14 @@ const navItems = [
   { href: "/admin/activity", label: "Activity Log", icon: Activity },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminName, setAdminName] = useState("Admin");
 
   useEffect(() => {
+    if (pathname === "/admin/login") return;
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
@@ -29,19 +30,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         });
       }
     });
-  }, []);
+  }, [pathname]);
 
   const handleLogout = async () => {
     if (!window.confirm("Are you sure you want to logout?")) return;
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/admin/login");
   };
 
-  const isActive = (href: string) => {
+  const isActive = (href) => {
     if (href === "/admin") return pathname === "/admin";
     return pathname.startsWith(href);
   };
+
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-100">

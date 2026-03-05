@@ -3,19 +3,27 @@ import { DoctorsTable } from "@/components/admin/DoctorsTable";
 
 export default async function DoctorsPage() {
   const supabase = createClient();
-  const { data } = await supabase
-    .from("users")
-    .select("id, name, email, phone, created_at, doctors:doctors(id, specialization, is_approved), appointments:appointments(id, status)")
-    .eq("role", "doctor")
-    .order("created_at", { ascending: false });
-  const doctors = data || [];
-  return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">All Doctors</h2>
-        <span className="text-sm text-gray-500">{doctors.length} total</span>
-      </div>
-      <DoctorsTable doctors={doctors} />
-    </div>
+  const { data: doctorRecords } = await supabase
+    .from("doctors")
+    .select("id, specialization, is_approved, created_at");
+
+  const doctors = await Promise.all(
+    (doctorRecords || []).map(async (d) => {
+      const { data: user } = await supabase
+        .from("users").select("id, name, email, phone").eq("id", d.id).single();
+      const { data: appts } = await supabase
+        .from("appointments").select("id, status").eq("doctor_id", d.id);
+      return {
+        id: d.id,
+        name: user?.name || "Unknown",
+        email: user?.email || "-",
+        phone: user?.phone || "-",
+        created_at: d.created_at,
+        doctors: [{ id: d.id, specialization: d.specialization, is_approved: d.is_approved }],
+        appointments: appts || [],
+      };
+    })
   );
+
+  return <DoctorsTable doctors={doctors} />;
 }
