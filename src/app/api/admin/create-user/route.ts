@@ -13,11 +13,14 @@ export async function POST(request: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
-  const { name, email, password, specialization } = await request.json();
+  const body = await request.json();
+  const { type, name, email, password, specialization } = body;
 
   const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
-    email, password, email_confirm: true,
-    user_metadata: { name, role: "doctor" }
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name, role: type }
   });
 
   if (authError || !authData.user) {
@@ -27,7 +30,7 @@ export async function POST(request: NextRequest) {
   const userId = authData.user.id;
 
   const { error: userError } = await adminSupabase.from("users").insert({
-    id: userId, name, email, role: "doctor",
+    id: userId, name, email, role: type,
   });
 
   if (userError) {
@@ -35,13 +38,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: userError.message }, { status: 400 });
   }
 
-  const { error: docError } = await adminSupabase.from("doctors").insert({
-    id: userId, specialization, is_approved: true,
-  });
-
-  if (docError) {
-    await adminSupabase.auth.admin.deleteUser(userId);
-    return NextResponse.json({ error: docError.message }, { status: 400 });
+  if (type === "doctor") {
+    const { error: docError } = await adminSupabase.from("doctors").insert({
+      id: userId, specialization, is_approved: true,
+    });
+    if (docError) {
+      await adminSupabase.auth.admin.deleteUser(userId);
+      return NextResponse.json({ error: docError.message }, { status: 400 });
+    }
   }
 
   return NextResponse.json({ success: true });
