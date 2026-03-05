@@ -21,18 +21,16 @@ export async function POST(request: NextRequest) {
     }
 
     const { error: userError } = await adminSupabase.from("users").insert({
-      id: authData.user.id, name, email, role: "patient",
+      id: authData.user.id, name, email, role: "patient", phone: phone || null,
     });
 
     if (userError) {
-      console.error("Users insert error:", userError);
       await adminSupabase.auth.admin.deleteUser(authData.user.id);
-      return NextResponse.json({ error: "DB insert failed: " + userError.message }, { status: 400 });
+      return NextResponse.json({ error: userError.message }, { status: 400 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error("Create patient error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

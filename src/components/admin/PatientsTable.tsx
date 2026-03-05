@@ -41,7 +41,7 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
       });
       const result = await res.json();
       if (!res.ok) { setAddError(result.error || "Failed to create patient"); setAdding(false); return; }
-      alert("Patient created successfully!"); window.location.href = "/admin/patients"; setShowAdd(false); setAddName(""); setAddEmail(""); setAddPhone(""); setAddPassword("");
+      window.location.href = "/admin/patients"; setShowAdd(false); setAddName(""); setAddEmail(""); setAddPhone(""); setAddPassword("");
       router.refresh();
     } catch (e) { setAddError("Something went wrong"); }
     setAdding(false);
@@ -168,5 +168,7 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
     </div>
   );
 }
+
+
 
 

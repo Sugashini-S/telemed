@@ -14,11 +14,27 @@ const navItems = [
   { href: "/admin/activity", label: "Activity Log", icon: Activity },
 ];
 
+function LogoutModal({ onConfirm, onCancel }) {
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"320px",boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
+        <h3 style={{margin:"0 0 8px",fontSize:"18px",fontWeight:"600",color:"#111"}}>Confirm Logout</h3>
+        <p style={{margin:"0 0 20px",fontSize:"14px",color:"#6b7280"}}>Are you sure you want to logout from the admin panel?</p>
+        <div style={{display:"flex",gap:"12px"}}>
+          <button onClick={onCancel} style={{flex:1,padding:"10px",border:"1px solid #d1d5db",background:"white",borderRadius:"8px",fontSize:"14px",cursor:"pointer",color:"#374151"}}>Cancel</button>
+          <button onClick={onConfirm} style={{flex:1,padding:"10px",background:"#dc2626",color:"white",border:"none",borderRadius:"8px",fontSize:"14px",fontWeight:"600",cursor:"pointer"}}>Logout</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminName, setAdminName] = useState("Admin");
+  const [showLogout, setShowLogout] = useState(false);
 
   useEffect(() => {
     if (pathname === "/admin/login") return;
@@ -33,7 +49,6 @@ export default function AdminLayout({ children }) {
   }, [pathname]);
 
   const handleLogout = async () => {
-    if (!window.confirm("Are you sure you want to logout?")) return;
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/admin/login");
@@ -49,38 +64,59 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"#f3f4f6"}}>
+      {showLogout && <LogoutModal onConfirm={handleLogout} onCancel={() => setShowLogout(false)} />}
       {sidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`fixed top-0 left-0 h-full w-64 bg-gray-900 text-white z-30 transform transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto flex flex-col overflow-hidden`}>
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-700">
-          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center"><Heart className="w-5 h-5 text-white" /></div>
-          <div><p className="font-bold text-sm text-white">TN Clinic Booker</p><p className="text-xs text-green-400">Admin Panel</p></div>
-          <button className="ml-auto lg:hidden text-gray-400 hover:text-white" onClick={() => setSidebarOpen(false)}><X className="w-5 h-5" /></button>
+
+      <aside style={{width:"256px",minWidth:"256px",height:"100vh",background:"#111827",color:"white",display:"flex",flexDirection:"column",position:"relative",zIndex:30}}>
+        <div style={{padding:"20px 24px",borderBottom:"1px solid #374151",display:"flex",alignItems:"center",gap:"12px"}}>
+          <div style={{width:"32px",height:"32px",background:"#16a34a",borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <Heart size={18} color="white" />
+          </div>
+          <div>
+            <p style={{fontWeight:"700",fontSize:"14px",color:"white",margin:0}}>TN Clinic Booker</p>
+            <p style={{fontSize:"12px",color:"#4ade80",margin:0}}>Admin Panel</p>
+          </div>
         </div>
-        <nav className="flex-1 px-4 py-6 space-y-1">
+
+        <nav style={{flex:1,padding:"16px",display:"flex",flexDirection:"column",gap:"4px",overflowY:"auto"}}>
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href} onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(href) ? "bg-green-600 text-white" : "text-gray-400 hover:bg-gray-800 hover:text-white"}`}>
-              <Icon className="w-5 h-5" />{label}
+              style={{display:"flex",alignItems:"center",gap:"12px",padding:"12px 16px",borderRadius:"8px",fontSize:"14px",fontWeight:"500",textDecoration:"none",transition:"background 0.15s",background:isActive(href)?"#16a34a":"transparent",color:isActive(href)?"white":"#9ca3af"}}>
+              <Icon size={18} />{label}
             </Link>
           ))}
         </nav>
-        <div className="px-4 py-4 border-t border-gray-700">
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-sm font-bold">{adminName.charAt(0).toUpperCase()}</div>
-            <div><p className="text-sm font-medium text-white truncate">{adminName}</p><p className="text-xs text-green-400">Administrator</p></div>
+
+        <div style={{padding:"16px",borderTop:"1px solid #374151"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"12px",padding:"8px 12px",marginBottom:"8px"}}>
+            <div style={{width:"36px",height:"36px",background:"#16a34a",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",fontWeight:"700",flexShrink:0}}>
+              {adminName.charAt(0).toUpperCase()}
+            </div>
+            <div style={{overflow:"hidden"}}>
+              <p style={{fontSize:"14px",fontWeight:"500",color:"white",margin:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{adminName}</p>
+              <p style={{fontSize:"12px",color:"#4ade80",margin:0}}>Administrator</p>
+            </div>
           </div>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 transition-colors">
-            <LogOut className="w-4 h-4" />Logout
+          <button onClick={() => setShowLogout(true)}
+            style={{width:"100%",display:"flex",alignItems:"center",gap:"12px",padding:"10px 16px",borderRadius:"8px",fontSize:"14px",color:"#9ca3af",background:"transparent",border:"none",cursor:"pointer",transition:"background 0.15s"}}
+            onMouseEnter={e => { e.currentTarget.style.background="#1f2937"; e.currentTarget.style.color="#f87171"; }}
+            onMouseLeave={e => { e.currentTarget.style.background="transparent"; e.currentTarget.style.color="#9ca3af"; }}>
+            <LogOut size={16} />Logout
           </button>
         </div>
       </aside>
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-4">
-          <button className="lg:hidden text-gray-500" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button>
-          <h1 className="text-lg font-semibold text-gray-800">{navItems.find((n) => isActive(n.href))?.label ?? "Admin"}</h1>
+
+      <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+        <header style={{background:"white",borderBottom:"1px solid #e5e7eb",padding:"16px 24px",display:"flex",alignItems:"center",gap:"16px",flexShrink:0}}>
+          <button className="lg:hidden" onClick={() => setSidebarOpen(true)} style={{background:"none",border:"none",cursor:"pointer",color:"#6b7280"}}>
+            <Menu size={24} />
+          </button>
+          <h1 style={{fontSize:"18px",fontWeight:"600",color:"#1f2937",margin:0}}>
+            {navItems.find((n) => isActive(n.href))?.label ?? "Admin"}
+          </h1>
         </header>
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+        <main style={{flex:1,padding:"24px",overflowY:"auto"}}>{children}</main>
       </div>
     </div>
   );
