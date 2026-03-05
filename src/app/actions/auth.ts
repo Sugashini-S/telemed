@@ -18,6 +18,17 @@ export async function loginAction(formData: FormData) {
         return { error: error.message };
     }
 
+    // Check user role
+    const { data: userData } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+    if (userData?.role === "admin") {
+        redirect("/admin");
+    }
+
     redirect("/dashboard");
 }
 
