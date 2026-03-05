@@ -20,6 +20,7 @@ export function Footer() {
                     <p className="text-xs text-white/60">{t("footer_made")}</p>
                 </div>
             </div>
-        </footer>
+          <div className="text-center py-2 border-t border-white/10"><a href="/admin" className="text-xs text-white/40 hover:text-white/70 transition-colors">Admin Panel</a></div>
+</footer>
     );
 }
