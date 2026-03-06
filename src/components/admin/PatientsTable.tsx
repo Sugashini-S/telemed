@@ -20,7 +20,6 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
   const [addName, setAddName] = useState("");
   const [addEmail, setAddEmail] = useState("");
   const [addPhone, setAddPhone] = useState("");
-  const [addPassword, setAddPassword] = useState("");
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState("");
   const router = useRouter();
@@ -31,17 +30,17 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
   );
 
   const addPatient = async () => {
-    if (!addName || !addEmail || !addPassword) { setAddError("Name, email and password are required"); return; }
+    if (!addName) { setAddError("Patient name is required"); return; }
     setAdding(true); setAddError("");
     try {
       const res = await fetch("/api/admin/create-patient", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: addName, email: addEmail, phone: addPhone, password: addPassword }),
+        body: JSON.stringify({ name: addName, email: `patient_${Date.now()}@clinic.local`, phone: addPhone, password: `Patient@${Date.now()}` }),
       });
       const result = await res.json();
       if (!res.ok) { setAddError(result.error || "Failed to create patient"); setAdding(false); return; }
-      window.location.href = "/admin/patients"; setShowAdd(false); setAddName(""); setAddEmail(""); setAddPhone(""); setAddPassword("");
+      window.location.href = "/admin/patients"; setShowAdd(false); setAddName(""); setAddEmail(""); setAddPhone("");
       router.refresh();
     } catch (e) { setAddError("Something went wrong"); }
     setAdding(false);
@@ -96,8 +95,6 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
               <div className="p-6 space-y-4">
                 {addError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{addError}</p>}
                 <div><label className="text-sm font-medium text-gray-700 block mb-1">Full Name *</label><input value={addName} onChange={(e) => setAddName(e.target.value)} placeholder="Patient name" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" /></div>
-                <div><label className="text-sm font-medium text-gray-700 block mb-1">Email *</label><input value={addEmail} onChange={(e) => setAddEmail(e.target.value)} placeholder="patient@email.com" type="email" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" /></div>
-                <div><label className="text-sm font-medium text-gray-700 block mb-1">Password *</label><input value={addPassword} onChange={(e) => setAddPassword(e.target.value)} placeholder="Min 6 characters" type="password" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" /></div>
                 <div><label className="text-sm font-medium text-gray-700 block mb-1">Phone</label><input value={addPhone} onChange={(e) => setAddPhone(e.target.value)} placeholder="+91 98765 43210" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" /></div>
               </div>
               <div className="flex gap-3 p-6 border-t">
@@ -168,6 +165,7 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
     </div>
   );
 }
+
 
 
 
