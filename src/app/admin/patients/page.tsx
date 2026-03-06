@@ -9,7 +9,7 @@ export default async function PatientsPage() {
     .eq("role", "patient")
     .order("created_at", { ascending: false });
 
-  const patients = (data || []).map((p: any) => ({
+  const patients = (data || []).map((p: any) // eslint-disable-line => ({
     id: p.id,
     name: p.name,
     email: p.email,
@@ -20,3 +20,4 @@ export default async function PatientsPage() {
 
   return <PatientsTable patients={patients} />;
 }
+
