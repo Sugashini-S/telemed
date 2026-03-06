@@ -1,6 +1,8 @@
 ﻿import { createClient } from "@/lib/supabase/server";
 import { PatientsTable } from "@/components/admin/PatientsTable";
 
+export const dynamic = "force-dynamic";
+
 export default async function PatientsPage() {
   const supabase = createClient();
   const { data } = await supabase
@@ -9,15 +11,14 @@ export default async function PatientsPage() {
     .eq("role", "patient")
     .order("created_at", { ascending: false });
 
-  const patients = (data || []).map((p: any) // eslint-disable-line => ({
-    id: p.id,
-    name: p.name,
-    email: p.email,
-    phone: p.phone || "",
-    created_at: p.created_at,
-    appointments: p.appointments || [],
+  const patients = (data || []).map((p) => ({
+    id: p.id as string,
+    name: p.name as string,
+    email: p.email as string,
+    phone: (p.phone || "") as string,
+    created_at: p.created_at as string,
+    appointments: (p.appointments || []) as { id: string; status: string }[],
   }));
 
   return <PatientsTable patients={patients} />;
 }
-
