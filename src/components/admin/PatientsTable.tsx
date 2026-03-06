@@ -63,7 +63,7 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
   };
 
   const exportCSV = () => {
-    const rows = patients.map((p) => [p.name, p.email, p.phone || "-", new Date(p.created_at).toISOString().split("T")[0], p.appointments.length, p.appointments.filter((a) => a.status === "pending").length, p.appointments.filter((a) => a.status === "completed").length]);
+    const rows = patients.map((p) => [p.name, p.email, p.phone || "-", new Date(p.created_at).toISOString().split("T")[0], p.appointments.length, p.appointments.filter((a) => a.status === "booked").length, p.appointments.filter((a) => a.status === "completed").length]);
     const csv = [["Name","Email","Phone","Registered","Total","Pending","Completed"], ...rows].map((r) => r.join(",")).join("\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "patients.csv"; a.click();
   };
@@ -146,7 +146,7 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
                   <td className="py-3 px-3">{editId === p.id ? <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="border border-gray-200 rounded px-2 py-1 text-sm w-28" /> : <span className="text-gray-500">{p.phone || "-"}</span>}</td>
                   <td className="py-3 px-3 text-gray-400 text-xs">{new Date(p.created_at).toISOString().split("T")[0]}</td>
                   <td className="py-3 px-3 font-semibold text-gray-700">{p.appointments.length}</td>
-                  <td className="py-3 px-3"><span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs">{p.appointments.filter((a) => a.status === "pending").length}</span></td>
+                  <td className="py-3 px-3"><span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs">{p.appointments.filter((a) => a.status === "booked").length}</span></td>
                   <td className="py-3 px-3"><span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">{p.appointments.filter((a) => a.status === "completed").length}</span></td>
                   <td className="py-3 px-3">
                     <div className="flex items-center gap-1">
@@ -168,6 +168,8 @@ export function PatientsTable({ patients: initial }: { patients: Patient[] }) {
     </div>
   );
 }
+
+
 
 
 
