@@ -12,7 +12,7 @@ export const translations = {
         nav_language: "தமிழ்",
 
         // Landing Page
-        hero_title: "Healthcare for Rural Tamil Nadu",
+        hero_title: "Healthcare for Govt. Tamil Nadu",
         hero_subtitle: "Book appointments with PHC doctors digitally. Access quality healthcare from your village — no long queues, no wasted trips.",
         hero_cta: "Book an Appointment",
         hero_cta_secondary: "View Doctors",
@@ -36,7 +36,7 @@ export const translations = {
         login_no_account: "Don't have an account?",
         login_register_link: "Register here",
         register_title: "Create Account",
-        register_subtitle: "Join Rural TN Clinic Booker",
+        register_subtitle: "Join TN Govt. Clinic Booker",
         register_name: "Full Name",
         register_email: "Email Address",
         register_password: "Password",
@@ -90,7 +90,7 @@ export const translations = {
         booking_no_slots: "No available slots for this date",
 
         // Footer
-        footer_text: "Rural TN Clinic Booker — Bringing healthcare closer to villages",
+        footer_text: "TN Govt. Clinic Booker — Bringing healthcare closer to villages",
         footer_made: "Built for Tamil Nadu's rural communities",
     },
     ta: {
@@ -130,7 +130,7 @@ export const translations = {
         login_no_account: "கணக்கு இல்லையா?",
         login_register_link: "இங்கே பதிவு செய்யுங்கள்",
         register_title: "கணக்கு உருவாக்கு",
-        register_subtitle: "Rural TN Clinic Booker-ல் சேரவும்",
+        register_subtitle: "TN Govt. Clinic Booker-ல் சேரவும்",
         register_name: "முழு பெயர்",
         register_email: "மின்னஞ்சல்",
         register_password: "கடவுச்சொல்",
@@ -184,7 +184,7 @@ export const translations = {
         booking_no_slots: "இந்த தேதிக்கு இடங்கள் இல்லை",
 
         // Footer
-        footer_text: "Rural TN Clinic Booker — கிராமங்களுக்கு சுகாதாரத்தை நெருக்கமாகக் கொண்டுவருகிறது",
+        footer_text: "TN Govt. Clinic Booker — கிராமங்களுக்கு சுகாதாரத்தை நெருக்கமாகக் கொண்டுவருகிறது",
         footer_made: "தமிழ்நாட்டின் கிராமப்புற சமூகங்களுக்காக உருவாக்கப்பட்டது",
     },
 } as const;
